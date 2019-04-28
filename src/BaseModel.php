@@ -12,18 +12,124 @@ use Illuminate\Support\Facades\DB;
 
 class BaseModel extends Model
 {
+    protected $guarded = [];
+
+    /**
+     * Notes: 新增
+     * Date: 2019/4/28 15:43
+     * @param array $params
+     * @return array
+     */
+    protected static function createBatch($params = []): array
+    {
+        $code = 200;
+        $msg = '添加成功！';
+        if(!is_array($params))
+        {
+            $code   = 500;
+            $msg    = '参数错误!';
+        }else{
+            if(!$re = self::create($params))
+            {
+                $code   = 500;
+                $msg    = '添加失败!';
+            }
+        }
+
+        return [
+            'code'  => $code,
+            'data'  => $msg,
+        ];
+    }
+
+    /**
+     * Notes: 详情
+     * Date: 2019/4/28 14:52
+     * @param $id
+     * @return Model|BaseModel|null
+     */
+    protected static function detail($id = ''): array
+    {
+        $code = 200;
+        $data = '';
+        if(!$re = self::where('id', $id)->first())
+        {
+            $code  = 500;
+            $data = '暂无数据!';
+        }
+
+        return [
+            'code'  => $code,
+            'data'  => $data ? $data : $re,
+        ];
+    }
+
+    /**
+     * Notes: 修改
+     * Date: 2019/4/28 15:55
+     * @param string $id
+     * @param $params
+     * @return array
+     */
+    protected static function modify($id = '', $params = []): array
+    {
+        $code = 200;
+        $msg = '修改成功！';
+        if(!is_array($params) || !$id)
+        {
+            $code   = 500;
+            $msg    = '参数错误!';
+        }else{
+            if(!$re = self::where('id', $id)->update($params))
+            {
+                $code   = 500;
+                $msg    = '修改失败!';
+            }
+        }
+
+        return [
+            'code'  => $code,
+            'data'  => $msg,
+        ];
+    }
+
+    /**
+     * Notes: 删除
+     * Date: 2019/4/28 14:58
+     * @param $id
+     * @return Model|BaseModel|null
+     */
+    protected static function del($id = ''): array
+    {
+        $code = 200;
+        $msg = '删除成功';
+        if(!self::where('id', $id)->delete())
+        {
+            $code = 500;
+            $msg = '删除失败';
+        }
+
+        return [
+            'code'  => $code,
+            'msg'   => $msg,
+        ];
+    }
+
     /**
      * Notes: 批量更新
      * Date: 2019/4/26 13:52
      * @param array $multipleData
      * @return bool
      */
-    public function updateBatch($multipleData = [])
+    public function updateBatch($multipleData = []): array
     {
+        $code = 200;
+        $msg = '更新成功';
+
         DB::beginTransaction();
         try {
-            if (empty($multipleData)) {
-                throw new \Exception("数据不能为空");
+            if (empty($multipleData) || !is_array($multipleData)) {
+                throw new \Exception("数据格式错误");
             }
             $tableName = DB::getTablePrefix() . $this->getTable(); // 表名
             $firstRow = current($multipleData);
@@ -55,17 +161,15 @@ class BaseModel extends Model
             // 传入预处理sql语句和对应绑定数据
             DB::update($updateSql, $bindings);
             DB::commit();
-
-            return [
-                'code'  => 200,
-                'msg'   => '更新成功'
-            ];
         } catch (\Exception $e) {
             DB::rollback();
-            return [
-                'code'  => 500,
-                'msg'   => $e->getMessage()
-            ];
+            $code = 500;
+            $msg = $e->getMessage();
         }
+
+        return [
+            'code'  => $code,
+            'msg'   => $msg
+        ];
     }
 }
