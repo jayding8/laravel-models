@@ -24,16 +24,10 @@ class BaseModel extends Model
     {
         $code = 200;
         $msg = '添加成功！';
-        if(empty($params))
+        if(!$re = self::create($params))
         {
             $code   = 500;
-            $msg    = '参数错误!';
-        }else{
-            if(!$re = self::create($params))
-            {
-                $code   = 500;
-                $msg    = '添加失败!';
-            }
+            $msg    = '添加失败!';
         }
 
         return [
@@ -52,15 +46,10 @@ class BaseModel extends Model
     {
         $code = 200;
         $data = '';
-        if(empty($where))
+        if (!$re = self::where($where)->first())
         {
-            $code   = 500;
-            $data    = '参数错误!';
-        }else {
-            if (!$re = self::where($where)->first()) {
-                $code = 500;
-                $data = '暂无数据!';
-            }
+            $code = 500;
+            $data = '暂无数据!';
         }
 
         return [
@@ -80,16 +69,10 @@ class BaseModel extends Model
     {
         $code = 200;
         $msg = '修改成功！';
-        if(empty($where) || empty($params))
+        if(!$re = self::where($where)->update($params))
         {
             $code   = 500;
-            $msg    = '参数错误!';
-        }else{
-            if(!$re = self::where($where)->update($params))
-            {
-                $code   = 500;
-                $msg    = '修改失败!';
-            }
+            $msg    = '修改失败!';
         }
 
         return [
@@ -133,9 +116,6 @@ class BaseModel extends Model
 
         DB::beginTransaction();
         try {
-            if (empty($multipleData)) {
-                throw new \Exception("数据格式错误");
-            }
             $tableName = DB::getTablePrefix() . $this->getTable(); // 表名
             $firstRow = current($multipleData);
 
