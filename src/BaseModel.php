@@ -215,9 +215,13 @@ class BaseModel extends Model
                     case 'like':
                         $query->where($k, $sign, '%'.last($v).'%');
                         break;
+                    default:
+                        $query;
+                        break;
                 }
             } else {
-                $query->where($k, $v);
+                if($v) $query->where($k, $v);
+                else $query;
             }
         }
         return $query;
