@@ -220,8 +220,7 @@ class BaseModel extends Model
                         break;
                 }
             } else {
-                if($v) $query->where($k, $v);
-                else $query;
+                $v ? $query->where($k, $v) : $query;
             }
         }
         return $query;
