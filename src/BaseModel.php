@@ -24,10 +24,10 @@ class BaseModel extends Model
     {
         $code = 200;
         $msg = '添加成功！';
-        if(!is_array($params))
+        if(!is_array($params) || empty($params))
         {
             $code   = 500;
-            $msg    = '参数错误!';
+            $msg    = '参数格式错误!';
         }else{
             if(!$re = self::create($params))
             {
@@ -48,14 +48,19 @@ class BaseModel extends Model
      * @param $id
      * @return Model|BaseModel|null
      */
-    protected static function detail($id = ''): array
+    protected static function detail($where = []): array
     {
         $code = 200;
         $data = '';
-        if(!$re = self::where('id', $id)->first())
+        if(!is_array($where) || empty($where))
         {
-            $code  = 500;
-            $data = '暂无数据!';
+            $code   = 500;
+            $data    = '参数格式错误!';
+        }else {
+            if (!$re = self::where($where)->first()) {
+                $code = 500;
+                $data = '暂无数据!';
+            }
         }
 
         return [
@@ -71,16 +76,16 @@ class BaseModel extends Model
      * @param $params
      * @return array
      */
-    protected static function modify($id = '', $params = []): array
+    protected static function modify($where = [], $params = []): array
     {
         $code = 200;
         $msg = '修改成功！';
-        if(!is_array($params) || !$id)
+        if(!is_array($params) || !is_array($where) || empty($where) || empty($params))
         {
             $code   = 500;
-            $msg    = '参数错误!';
+            $msg    = '参数格式错误!';
         }else{
-            if(!$re = self::where('id', $id)->update($params))
+            if(!$re = self::where($where)->update($params))
             {
                 $code   = 500;
                 $msg    = '修改失败!';
