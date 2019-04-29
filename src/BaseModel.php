@@ -20,14 +20,14 @@ class BaseModel extends Model
      * @param array $params
      * @return array
      */
-    protected static function createBatch($params = []): array
+    protected static function createBatch(array $params = []): array
     {
         $code = 200;
         $msg = '添加成功！';
-        if(!is_array($params) || empty($params))
+        if(empty($params))
         {
             $code   = 500;
-            $msg    = '参数格式错误!';
+            $msg    = '参数错误!';
         }else{
             if(!$re = self::create($params))
             {
@@ -48,14 +48,14 @@ class BaseModel extends Model
      * @param $id
      * @return Model|BaseModel|null
      */
-    protected static function detail($where = []): array
+    protected static function detail(array $where = []): array
     {
         $code = 200;
         $data = '';
-        if(!is_array($where) || empty($where))
+        if(empty($where))
         {
             $code   = 500;
-            $data    = '参数格式错误!';
+            $data    = '参数错误!';
         }else {
             if (!$re = self::where($where)->first()) {
                 $code = 500;
@@ -76,14 +76,14 @@ class BaseModel extends Model
      * @param $params
      * @return array
      */
-    protected static function modify($where = [], $params = []): array
+    protected static function modify(array $where = [], array $params = []): array
     {
         $code = 200;
         $msg = '修改成功！';
-        if(!is_array($params) || !is_array($where) || empty($where) || empty($params))
+        if(empty($where) || empty($params))
         {
             $code   = 500;
-            $msg    = '参数格式错误!';
+            $msg    = '参数错误!';
         }else{
             if(!$re = self::where($where)->update($params))
             {
@@ -126,14 +126,14 @@ class BaseModel extends Model
      * @param array $multipleData
      * @return bool
      */
-    public function updateBatch($multipleData = []): array
+    public function updateBatch(array $multipleData = []): array
     {
         $code = 200;
         $msg = '更新成功';
 
         DB::beginTransaction();
         try {
-            if (empty($multipleData) || !is_array($multipleData)) {
+            if (empty($multipleData)) {
                 throw new \Exception("数据格式错误");
             }
             $tableName = DB::getTablePrefix() . $this->getTable(); // 表名
@@ -176,5 +176,70 @@ class BaseModel extends Model
             'code'  => $code,
             'msg'   => $msg
         ];
+    }
+
+    /**
+     * Notes: 使用作用域扩展 Builder 链式操作
+     * Date: 2019/4/29 13:18
+     * @param $query
+     * @param array $map
+     * @return mixed
+     *
+     *  示例:
+     * $map = [
+     *     'id' => 1,
+     *     'id' => ['in', [1,2,3]],
+     *     'id' => ['or', 22],
+     *     'id' => ['<>', 9],
+     * ]
+     */
+    public function scopeWhereMap($query, array $map = [])
+    {
+        // 如果是空直接返回
+        if (empty($map)) {
+            return $query;
+        }
+
+        // 判断各种方法
+        foreach ($map as $k => $v) {
+            if (is_array($v)) {
+                $sign = strtolower(current($v));
+                switch ($sign) {
+                    case 'in':
+                        $query->whereIn($k, last($v));
+                        break;
+                    case 'or':
+                        $query->orWhere($k, last($v));
+                        break;
+                    case 'notin':
+                        $query->whereNotIn($k, last($v));
+                        break;
+                    case 'between':
+                        $query->whereBetween($k, last($v));
+                        break;
+                    case 'notbetween':
+                        $query->whereNotBetween($k, last($v));
+                        break;
+                    case 'null':
+                        $query->whereNull($k);
+                        break;
+                    case 'notnull':
+                        $query->whereNotNull($k);
+                        break;
+                    case '=':
+                    case '>':
+                    case '<':
+                    case '<>':
+                        $query->where($k, $sign, last($v));
+                        break;
+                    case 'like':
+                        $query->where($k, $sign, '%'.last($v).'%');
+                        break;
+                }
+            } else {
+                $query->where($k, $v);
+            }
+        }
+        return $query;
     }
 }
