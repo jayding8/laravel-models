@@ -215,6 +215,12 @@ class BaseModel extends Model
                     case 'like':
                         $query->where($k, $sign, '%'.last($v).'%');
                         break;
+                    case 'start':
+                        $query->where($k, $sign, '%'.last($v));
+                        break;
+                    case 'end':
+                        $query->where($k, $sign, last($v).'%');
+                        break;
                     default:
                         $query;
                         break;
