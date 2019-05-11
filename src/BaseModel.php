@@ -16,59 +16,50 @@ class BaseModel extends Model
 
     /**
      * Notes: 新增
-     * Date: 2019/4/28 15:43
+     * Date: 2019/5/11 17:59
      * @param array $params
-     * @return array
+     * @return mixed
      */
     protected static function store(array $params = [])
     {
-        if(!$re = self::create($params))
-            return false;
-
-        return $re;
+        return self::create($params);
     }
 
     /**
      * Notes: 详情
-     * Date: 2019/4/28 14:52
-     * @param $id
-     * @return Model|BaseModel|null
+     * Date: 2019/5/11 17:59
+     * @param array $where
+     * @return mixed
      */
     protected static function detail(array $where = [])
     {
-        if (!$re = self::where($where)->first())
-            return false;
-
-        return $re;
+        return self::where($where)->first();
     }
 
     /**
      * Notes: 修改
-     * Date: 2019/4/28 15:55
-     * @param string $id
-     * @param $params
-     * @return array
+     * Date: 2019/5/11 17:59
+     * @param array $where
+     * @param array $params
+     * @return mixed
      */
     protected static function modify(array $where = [], array $params = [])
     {
-        if(!$re = self::where($where)->update($params))
-            return false;
-
-        return true;
+        return self::where($where)->update($params);
     }
 
     /**
      * Notes: 删除
-     * Date: 2019/4/28 14:58
+     * Date: 2019/5/11 18:04
      * @param $id
-     * @return Model|BaseModel|null
+     * @return mixed
      */
-    protected static function destory($id = '')
+    protected static function del($id)
     {
-        if(!self::where('id', $id)->delete())
-            return false;
-
-        return true;
+        if(is_array($id))
+            return self::destory($id);
+        else
+            return self::where('id', $id)->fisrt()->delete();
     }
 
     /**
