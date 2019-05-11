@@ -20,20 +20,12 @@ class BaseModel extends Model
      * @param array $params
      * @return array
      */
-    protected static function createBatch(array $params = []): array
+    protected static function store(array $params = [])
     {
-        $code = 200;
-        $msg = '添加成功！';
         if(!$re = self::create($params))
-        {
-            $code   = 500;
-            $msg    = '添加失败!';
-        }
+            return false;
 
-        return [
-            'code'  => $code,
-            'data'  => $msg,
-        ];
+        return $re;
     }
 
     /**
@@ -42,20 +34,12 @@ class BaseModel extends Model
      * @param $id
      * @return Model|BaseModel|null
      */
-    protected static function detail(array $where = []): array
+    protected static function detail(array $where = [])
     {
-        $code = 200;
-        $data = '';
         if (!$re = self::where($where)->first())
-        {
-            $code = 500;
-            $data = '暂无数据!';
-        }
+            return false;
 
-        return [
-            'code'  => $code,
-            'data'  => $data ? $data : $re,
-        ];
+        return $re;
     }
 
     /**
@@ -65,20 +49,12 @@ class BaseModel extends Model
      * @param $params
      * @return array
      */
-    protected static function modify(array $where = [], array $params = []): array
+    protected static function modify(array $where = [], array $params = [])
     {
-        $code = 200;
-        $msg = '修改成功！';
         if(!$re = self::where($where)->update($params))
-        {
-            $code   = 500;
-            $msg    = '修改失败!';
-        }
+            return false;
 
-        return [
-            'code'  => $code,
-            'data'  => $msg,
-        ];
+        return true;
     }
 
     /**
@@ -87,20 +63,12 @@ class BaseModel extends Model
      * @param $id
      * @return Model|BaseModel|null
      */
-    protected static function del($id = ''): array
+    protected static function destory($id = '')
     {
-        $code = 200;
-        $msg = '删除成功';
         if(!self::where('id', $id)->delete())
-        {
-            $code = 500;
-            $msg = '删除失败';
-        }
+            return false;
 
-        return [
-            'code'  => $code,
-            'msg'   => $msg,
-        ];
+        return true;
     }
 
     /**
@@ -109,11 +77,8 @@ class BaseModel extends Model
      * @param array $multipleData
      * @return bool
      */
-    public function updateBatch(array $multipleData = []): array
+    public function updateBatch(array $multipleData = [])
     {
-        $code = 200;
-        $msg = '更新成功';
-
         DB::beginTransaction();
         try {
             $tableName = DB::getTablePrefix() . $this->getTable(); // 表名
@@ -148,14 +113,10 @@ class BaseModel extends Model
             DB::commit();
         } catch (\Exception $e) {
             DB::rollback();
-            $code = 500;
-            $msg = $e->getMessage();
+            return false;
         }
 
-        return [
-            'code'  => $code,
-            'msg'   => $msg
-        ];
+        return true;
     }
 
     /**
